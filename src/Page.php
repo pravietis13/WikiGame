@@ -1,4 +1,6 @@
 <?php
+//TODO класс Page не должен отвечать за вывод данных (в консоль например)
+//TODO в идеале - только за хранение и преобразование данных Page
 class Page{
     private $title;
     private $html;
@@ -15,7 +17,14 @@ class Page{
         $attempt = 0;
         while (true) {
             $attempt++;
-            if(($this->html = @file_get_contents($url)) !== false){
+            print $url;
+            $file_get_contents = null;
+            try {
+                $file_get_contents = file_get_contents($url);
+            } catch (Exception $e) {
+                print $e->getMessage();
+            }
+            if(($this->html = $file_get_contents) !== false){
                 break;
             }
             if ($attempt == 1){
@@ -45,7 +54,8 @@ class Page{
         $this->title = $title;
     }
 
-    private function parse_links(){
+    private function parse_links(){ //TODO чето сделть с этой функцией)
+        //TODO МБ заменить на поиск по регулярке - <a (.*)href="(.*)"(.*)>(.*)</a>
         $content_position = strpos($this->html, "<div id=\"mw-content-text\"")+30;
         $link_number = 1;
         while(strpos($this->html,"<noscript>", $content_position) > strpos($this->html, "<a href=\"/wiki/", $content_position)) {
@@ -68,6 +78,7 @@ class Page{
 
                 $content_position = strpos($this->html, "title=\"", $content_position)+7;
                 $current_link_title = "";
+                //TODO
                 while (substr($this->html,$content_position,1) != "\""){
                     $current_link_title = $current_link_title . substr($this->html, $content_position, 1);
                     $content_position++;
@@ -86,6 +97,7 @@ class Page{
     }
 
     public function print_links(){
+        //TODO foreach ($this->links as $link_number => $link){
         for ($link_number = 1; $link_number<=count($this->links); $link_number++){
             print $link_number . ". " . $this->links[$link_number]['title'] . "\n";
         }

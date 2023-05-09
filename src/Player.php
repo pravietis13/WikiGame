@@ -1,6 +1,7 @@
 <?php
 //require_once 'Page.php';
-
+//TODO класс Player не должен отвечать за вывод данных (в консоль например)
+//TODO в идеале - только за хранение и преобразование данных Player'a
 class Player{
     static private $start_page;
     static private $end_page;
@@ -10,6 +11,8 @@ class Player{
     private $current_page;
 
     public function __construct($player_number){
+        //TODO name set... - обычно setter - ничего не должен делать
+        //TODO всякие действия лучше выносить из конструктора
         $this->set_name($player_number);
         $this->redirect_count = 0;
         $this->current_page = self::$start_page;
@@ -31,6 +34,8 @@ class Player{
     }
 
     public static function set_route_pages(){
+        //TODO можно вынести ссылки в константы
+        //TODO Page::constructPageWithContent($url)
         self::$start_page = new Page("https://ru.wikipedia.org/wiki/Служебная:Случайная_страница");
         self::$end_page = new Page("https://ru.wikipedia.org/wiki/Служебная:Случайная_страница");
         while (self::$end_page == self::$start_page){
@@ -63,6 +68,7 @@ class Player{
     }
 
     public function is_still_playing(){
+        //TODO лучше поставить флаг
         if ($this->current_page == self::$end_page){
             return false;
         }

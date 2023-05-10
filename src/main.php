@@ -13,7 +13,14 @@ while (true) {
 
 $players = [];
 for ($i=1; $i<=$player_count; $i++){
-    $players[] = new Player($i);
+    while (true) {
+        print "Имя игрока " . $i . ">>";
+        $player_name = readline();
+        if($player_name != ""){
+            break;
+        }
+    }
+    $players[] = new Player($player_name);
 }
 
 $finished_players = 0;

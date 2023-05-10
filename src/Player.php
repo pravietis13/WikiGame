@@ -1,5 +1,4 @@
 <?php
-//require_once 'Page.php';
 
 class Player{
     static private $start_page;
@@ -9,25 +8,14 @@ class Player{
     private $redirect_count;
     private $current_page;
 
-    public function __construct($player_number){
-        $this->set_name($player_number);
+    public function __construct($name){
+        $this->name = $name;
+        if (strlen($name)>self::$max_name_length){
+            self::$max_name_length = strlen($name);
+        }
+
         $this->redirect_count = 0;
         $this->current_page = self::$start_page;
-    }
-
-    private function set_name($player_number){
-        while (true) {
-            print "Имя игрока " . $player_number . ">>";
-            $player_name = readline();
-            if($player_name != ""){
-                break;
-            }
-        }
-        $this->name = $player_name;
-
-        if (strlen($player_name)>self::$max_name_length){
-            self::$max_name_length = strlen($player_name);
-        }
     }
 
     public static function set_route_pages(){
@@ -42,8 +30,9 @@ class Player{
 
     public function make_move(){
         print "\n----- " . $this->current_page->get_title() . " -----\n";
-        $links_count = $this->current_page->print_links();
+        $this->current_page->print_links();
 
+        $links_count = $this->current_page->get_links_count();
         while (true) {
             print "Ход игрока " . $this->name . ">>";
             $page_number = readline();
@@ -52,7 +41,7 @@ class Player{
             }
         }
 
-        $this->current_page = new Page($this->current_page->get_link_by_number($page_number));
+        $this->current_page = new Page($this->current_page->get_link_by_number($page_number-1));
         $this->redirect_count++;
 
         if (!($this->is_still_playing())){

@@ -46,50 +46,34 @@ class Page{
     }
 
     private function parse_links(){
-        $content_position = strpos($this->html, "<div id=\"mw-content-text\"")+30;
-        $link_number = 1;
-        while(strpos($this->html,"<noscript>", $content_position) > strpos($this->html, "<a href=\"/wiki/", $content_position)) {
+        $article_start = strpos($this->html, "<div id=\"mw-content-text\"");
+        $article_end = strpos($this->html,"<noscript>", $article_start);
+        $this->html = substr($this->html, $article_start,$article_end-$article_start); //получили html, включающий только статью
 
-            $content_position = strpos($this->html, "<a href=\"/wiki/", $content_position)+15;
-            $current_link = "https://ru.wikipedia.org/wiki/";
-            while (substr($this->html,$content_position,1) != "\""){
-                $current_link = $current_link . substr($this->html, $content_position, 1);
-                $content_position++;
-            }
+        preg_match_all("<a href=\"/wiki/(.*?)\" title=\"(.*?)\">", $this->html,$temp, 0);
 
-            if((strpos($this->html, "title=\"", $content_position)) < strpos($this->html, ">", $content_position)){
-
-                if((strpos($this->html, "class=\"", $content_position)) < strpos($this->html, ">", $content_position)){
-                    if ((substr($this->html, strpos($this->html, "class=\"", $content_position)+7, 8) == "internal")
-                    or (substr($this->html, strpos($this->html, "class=\"", $content_position)+7, 5) == "image")){
-                        continue;
-                    }
+        foreach ($temp[0] as $num=>$item){
+            if (!(str_contains($item, "class=\"internal\"") or str_contains($item, "class=\"image\""))){ //отсеиваем не статьи
+                if (($link_end = strpos($temp[1][$num], "\"")) !== false){ //обрезаем остальные атрибуты кроме href
+                    $temp[1][$num] = substr($temp[1][$num], 0, $link_end);
                 }
 
-                $content_position = strpos($this->html, "title=\"", $content_position)+7;
-                $current_link_title = "";
-                while (substr($this->html,$content_position,1) != "\""){
-                    $current_link_title = $current_link_title . substr($this->html, $content_position, 1);
-                    $content_position++;
+                $link = array("title"=>$temp[2][$num], "url"=>"https://ru.wikipedia.org/wiki/" . $temp[1][$num]);
+                if(!(in_array($link, $this->links))) {
+                    $this->links[] = $link;
                 }
-            }
-            else{
-                continue;
-            }
-
-            $link = array("title"=>$current_link_title, "url"=>$current_link);
-            if(!(in_array($link, $this->links))) {
-                $this->links[$link_number] = $link;
-                $link_number++;
             }
         }
     }
 
     public function print_links(){
-        for ($link_number = 1; $link_number<=count($this->links); $link_number++){
-            print $link_number . ". " . $this->links[$link_number]['title'] . "\n";
+        foreach ($this->links as $num=>$link){
+            print $num+1 . ". " . $this->links[$num]['title'] . "\n";
         }
         print "\n";
+    }
+
+    public function get_links_count(){
         return count($this->links);
     }
 
